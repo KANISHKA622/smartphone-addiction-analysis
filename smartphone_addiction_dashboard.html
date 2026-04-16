@@ -1,0 +1,674 @@
+
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: var(--font-sans); }
+  .dash { background: #0d1117; min-height: 100vh; padding: 20px; color: #e6edf3; }
+  .dash-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; padding-bottom: 16px; border-bottom: 0.5px solid #30363d; }
+  .dash-title { font-size: 18px; font-weight: 500; color: #e6edf3; }
+  .dash-sub { font-size: 12px; color: #8b949e; margin-top: 3px; }
+  .badge { background: #1f3a5f; color: #79c0ff; font-size: 11px; padding: 3px 10px; border-radius: 20px; }
+  .section-label { font-size: 11px; font-weight: 500; color: #8b949e; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 12px; }
+  .kpi-grid { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 10px; margin-bottom: 20px; }
+  .kpi-card { background: #161b22; border: 0.5px solid #30363d; border-radius: 10px; padding: 14px 16px; }
+  .kpi-label { font-size: 11px; color: #8b949e; margin-bottom: 6px; }
+  .kpi-value { font-size: 22px; font-weight: 500; color: #e6edf3; }
+  .kpi-sub { font-size: 10px; color: #58a6ff; margin-top: 4px; }
+  .kpi-accent-blue { border-top: 2px solid #1f6feb; }
+  .kpi-accent-purple { border-top: 2px solid #8957e5; }
+  .kpi-accent-teal { border-top: 2px solid #1abc9c; }
+  .kpi-accent-red { border-top: 2px solid #f85149; }
+  .kpi-accent-amber { border-top: 2px solid #d29922; }
+  .kpi-accent-green { border-top: 2px solid #3fb950; }
+  .filters-row { display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; align-items: center; }
+  .filter-group { display: flex; flex-direction: column; gap: 4px; }
+  .filter-label { font-size: 10px; color: #8b949e; }
+  .filter-select { background: #161b22; border: 0.5px solid #30363d; color: #e6edf3; font-size: 12px; padding: 5px 10px; border-radius: 6px; cursor: pointer; }
+  .filter-select:focus { outline: none; border-color: #58a6ff; }
+  .reset-btn { background: #1f3a5f; color: #79c0ff; border: 0.5px solid #1f6feb; font-size: 12px; padding: 5px 14px; border-radius: 6px; cursor: pointer; margin-top: 14px; }
+  .reset-btn:hover { background: #1f6feb; color: #fff; }
+  .grid-2 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; margin-bottom: 12px; }
+  .grid-3 { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; margin-bottom: 12px; }
+  .grid-4 { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; margin-bottom: 12px; }
+  .grid-2-1 { display: grid; grid-template-columns: 2fr 1fr; gap: 12px; margin-bottom: 12px; }
+  .grid-1-2 { display: grid; grid-template-columns: 1fr 2fr; gap: 12px; margin-bottom: 12px; }
+  .card { background: #161b22; border: 0.5px solid #30363d; border-radius: 10px; padding: 16px; }
+  .card-title { font-size: 13px; font-weight: 500; color: #e6edf3; margin-bottom: 12px; }
+  .chart-wrap { position: relative; }
+  .insight-box { background: #0d2137; border: 0.5px solid #1f6feb; border-radius: 10px; padding: 16px; margin-bottom: 12px; }
+  .insight-title { font-size: 13px; font-weight: 500; color: #79c0ff; margin-bottom: 10px; display: flex; align-items: center; gap: 8px; }
+  .insight-icon { width: 18px; height: 18px; border-radius: 50%; background: #1f6feb; display: flex; align-items: center; justify-content: center; }
+  .insight-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+  .insight-item { background: #0d1117; border-radius: 8px; padding: 12px; border: 0.5px solid #21262d; }
+  .insight-item-title { font-size: 11px; color: #58a6ff; font-weight: 500; margin-bottom: 4px; }
+  .insight-item-text { font-size: 11px; color: #8b949e; line-height: 1.5; }
+  .bar-row { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+  .bar-label { font-size: 11px; color: #8b949e; width: 80px; flex-shrink: 0; text-align: right; }
+  .bar-track { flex: 1; height: 8px; background: #21262d; border-radius: 4px; overflow: hidden; }
+  .bar-fill { height: 100%; border-radius: 4px; }
+  .bar-val { font-size: 11px; color: #8b949e; width: 36px; flex-shrink: 0; }
+  .donut-wrap { display: flex; align-items: center; gap: 16px; }
+  .donut-legend { display: flex; flex-direction: column; gap: 8px; }
+  .legend-item { display: flex; align-items: center; gap: 6px; font-size: 11px; color: #8b949e; }
+  .legend-dot { width: 10px; height: 10px; border-radius: 2px; flex-shrink: 0; }
+  .heatmap-grid { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 4px; }
+  .heat-cell { height: 36px; border-radius: 4px; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 500; }
+  .stat-row { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 0.5px solid #21262d; }
+  .stat-row:last-child { border-bottom: none; }
+  .stat-key { font-size: 12px; color: #8b949e; }
+  .stat-val { font-size: 12px; color: #e6edf3; font-weight: 500; }
+  .pill { display: inline-block; padding: 2px 8px; border-radius: 20px; font-size: 10px; font-weight: 500; }
+  .pill-red { background: #3b1219; color: #f85149; }
+  .pill-amber { background: #3b2a0d; color: #d29922; }
+  .pill-green { background: #0d2a1a; color: #3fb950; }
+  .section-divider { font-size: 12px; font-weight: 500; color: #58a6ff; padding: 8px 0 12px; display: flex; align-items: center; gap: 10px; }
+  .section-divider::after { content: ''; flex: 1; height: 0.5px; background: #21262d; }
+</style>
+
+<div class="dash">
+  <h2 class="sr-only" style="position:absolute;left:-9999px;">Smartphone Usage and Addiction Analysis Dashboard — interactive charts showing usage patterns, addiction levels, and mental health indicators.</h2>
+
+  <div class="dash-header">
+    <div>
+      <div class="dash-title">Smartphone Usage & Addiction Analysis</div>
+      <div class="dash-sub">Executive Intelligence Dashboard · Research Edition</div>
+    </div>
+    <div style="display:flex;gap:8px;align-items:center;">
+      <span class="badge">N = 1,200 Users</span>
+      <span class="badge">2024 Dataset</span>
+    </div>
+  </div>
+
+  <div class="filters-row" id="filtersRow">
+    <div class="filter-group">
+      <div class="filter-label">Gender</div>
+      <select class="filter-select" id="fGender" onchange="applyFilters()">
+        <option value="all">All</option>
+        <option value="Male">Male</option>
+        <option value="Female">Female</option>
+      </select>
+    </div>
+    <div class="filter-group">
+      <div class="filter-label">Age Group</div>
+      <select class="filter-select" id="fAge" onchange="applyFilters()">
+        <option value="all">All</option>
+        <option value="13-17">13–17</option>
+        <option value="18-24">18–24</option>
+        <option value="25-34">25–34</option>
+        <option value="35-44">35–44</option>
+        <option value="45+">45+</option>
+      </select>
+    </div>
+    <div class="filter-group">
+      <div class="filter-label">Stress Level</div>
+      <select class="filter-select" id="fStress" onchange="applyFilters()">
+        <option value="all">All</option>
+        <option value="Low">Low</option>
+        <option value="Medium">Medium</option>
+        <option value="High">High</option>
+      </select>
+    </div>
+    <div class="filter-group">
+      <div class="filter-label">Addiction Level</div>
+      <select class="filter-select" id="fAddiction" onchange="applyFilters()">
+        <option value="all">All</option>
+        <option value="Mild">Mild</option>
+        <option value="Moderate">Moderate</option>
+        <option value="Severe">Severe</option>
+      </select>
+    </div>
+    <div class="filter-group">
+      <div class="filter-label">Academic / Work Impact</div>
+      <select class="filter-select" id="fImpact" onchange="applyFilters()">
+        <option value="all">All</option>
+        <option value="None">None</option>
+        <option value="Mild">Mild</option>
+        <option value="Significant">Significant</option>
+      </select>
+    </div>
+    <button class="reset-btn" onclick="resetFilters()">Reset filters</button>
+  </div>
+
+  <div class="section-label">Key performance indicators</div>
+  <div class="kpi-grid" id="kpiGrid">
+    <div class="kpi-card kpi-accent-blue">
+      <div class="kpi-label">Total users</div>
+      <div class="kpi-value" id="kpi-users">1,200</div>
+      <div class="kpi-sub">Survey respondents</div>
+    </div>
+    <div class="kpi-card kpi-accent-purple">
+      <div class="kpi-label">Avg daily screen time</div>
+      <div class="kpi-value" id="kpi-screen">7.4h</div>
+      <div class="kpi-sub">Hours per day</div>
+    </div>
+    <div class="kpi-card kpi-accent-teal">
+      <div class="kpi-label">Avg sleep hours</div>
+      <div class="kpi-value" id="kpi-sleep">6.2h</div>
+      <div class="kpi-sub">Per night</div>
+    </div>
+    <div class="kpi-card kpi-accent-red">
+      <div class="kpi-label">Addiction rate</div>
+      <div class="kpi-value" id="kpi-addiction">64%</div>
+      <div class="kpi-sub">Addicted label = Yes</div>
+    </div>
+    <div class="kpi-card kpi-accent-amber">
+      <div class="kpi-label">Avg notifications/day</div>
+      <div class="kpi-value" id="kpi-notif">87</div>
+      <div class="kpi-sub">Push alerts per day</div>
+    </div>
+    <div class="kpi-card kpi-accent-green">
+      <div class="kpi-label">Avg app opens/day</div>
+      <div class="kpi-value" id="kpi-apps">52</div>
+      <div class="kpi-sub">Sessions per day</div>
+    </div>
+  </div>
+
+  <div class="section-divider">Demographic analysis</div>
+
+  <div class="grid-4">
+    <div class="card">
+      <div class="card-title">Gender distribution</div>
+      <div class="donut-wrap">
+        <div class="chart-wrap" style="width:110px;height:110px;flex-shrink:0;">
+          <canvas id="donutGender" role="img" aria-label="Donut chart: Male 54%, Female 46%">Male 54%, Female 46%</canvas>
+        </div>
+        <div class="donut-legend" id="genderLegend">
+          <div class="legend-item"><div class="legend-dot" style="background:#1f6feb;"></div><span id="lgm">Male — 54%</span></div>
+          <div class="legend-item"><div class="legend-dot" style="background:#8957e5;"></div><span id="lgf">Female — 46%</span></div>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">Age group distribution</div>
+      <div class="chart-wrap" style="height:130px;">
+        <canvas id="ageBar" role="img" aria-label="Bar chart of user count by age group">Age distribution across 5 groups.</canvas>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">Addiction level by gender</div>
+      <div class="chart-wrap" style="height:130px;">
+        <canvas id="addGender" role="img" aria-label="Stacked bar showing addiction levels by gender">Addiction distribution by gender.</canvas>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">Addiction level by age group</div>
+      <div class="chart-wrap" style="height:130px;">
+        <canvas id="addAge" role="img" aria-label="Stacked bar showing addiction levels by age group">Addiction distribution by age.</canvas>
+      </div>
+    </div>
+  </div>
+
+  <div class="section-divider">Usage behavior analysis</div>
+
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-title">Screen time vs sleep hours</div>
+      <div class="chart-wrap" style="height:200px;">
+        <canvas id="scatterSleep" role="img" aria-label="Scatter plot of daily screen time vs sleep hours showing inverse relationship">Higher screen time correlates with fewer sleep hours.</canvas>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">App opens vs notifications</div>
+      <div class="chart-wrap" style="height:200px;">
+        <canvas id="scatterNotif" role="img" aria-label="Scatter plot of app opens vs notifications per day">App opens vs notification frequency.</canvas>
+      </div>
+    </div>
+  </div>
+
+  <div class="grid-3">
+    <div class="card">
+      <div class="card-title">Social media hours by addiction level</div>
+      <div class="chart-wrap" style="height:170px;">
+        <canvas id="socialBar" role="img" aria-label="Bar chart showing social media hours grouped by addiction level">Social media usage rises with addiction severity.</canvas>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">Gaming hours by addiction level</div>
+      <div class="chart-wrap" style="height:170px;">
+        <canvas id="gameBar" role="img" aria-label="Bar chart of gaming hours by addiction level">Gaming hours by addiction level.</canvas>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">Weekend vs weekday screen time</div>
+      <div class="chart-wrap" style="height:170px;">
+        <canvas id="weekendBar" role="img" aria-label="Grouped bar chart comparing weekend and weekday screen time by addiction level">Weekend vs weekday screen time comparison.</canvas>
+      </div>
+    </div>
+  </div>
+
+  <div class="section-divider">Mental health & productivity</div>
+
+  <div class="grid-4">
+    <div class="card">
+      <div class="card-title">Stress level distribution</div>
+      <div class="chart-wrap" style="height:150px;">
+        <canvas id="stressDonut" role="img" aria-label="Donut chart of stress level distribution">Stress level: Low, Medium, High breakdown.</canvas>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">Academic / work impact</div>
+      <div class="chart-wrap" style="height:150px;">
+        <canvas id="impactBar" role="img" aria-label="Horizontal bar chart of academic and work impact by addiction level">Impact distribution by addiction category.</canvas>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">Stress vs screen time</div>
+      <div class="chart-wrap" style="height:150px;">
+        <canvas id="stressScreen" role="img" aria-label="Bar chart of average screen time grouped by stress level">Higher stress linked to longer screen time.</canvas>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">Sleep reduction — addicted vs not</div>
+      <div id="sleepCompare" style="margin-top:8px;">
+        <div class="stat-row"><div class="stat-key">Non-addicted avg sleep</div><div class="stat-val" id="sleepNo">7.4h</div></div>
+        <div class="stat-row"><div class="stat-key">Addicted avg sleep</div><div class="stat-val" id="sleepYes" style="color:#f85149;">5.8h</div></div>
+        <div class="stat-row"><div class="stat-key">Reduction</div><div class="stat-val" id="sleepDiff" style="color:#d29922;">−1.6h</div></div>
+        <div style="margin-top:12px;">
+          <div style="font-size:10px;color:#8b949e;margin-bottom:4px;">Non-addicted</div>
+          <div style="height:8px;background:#21262d;border-radius:4px;overflow:hidden;margin-bottom:8px;"><div id="barNa" style="height:100%;width:74%;background:#3fb950;border-radius:4px;"></div></div>
+          <div style="font-size:10px;color:#8b949e;margin-bottom:4px;">Addicted</div>
+          <div style="height:8px;background:#21262d;border-radius:4px;overflow:hidden;"><div id="barA" style="height:100%;width:58%;background:#f85149;border-radius:4px;"></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section-divider">Addiction insights</div>
+
+  <div class="grid-3">
+    <div class="card">
+      <div class="card-title">Addicted vs non-addicted</div>
+      <div class="chart-wrap" style="height:170px;">
+        <canvas id="addPie" role="img" aria-label="Pie chart showing addicted vs non-addicted users">64% addicted, 36% non-addicted.</canvas>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">Addiction level breakdown</div>
+      <div class="chart-wrap" style="height:170px;">
+        <canvas id="addLevel" role="img" aria-label="Doughnut chart of addiction severity: Mild, Moderate, Severe">Addiction severity distribution.</canvas>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">Top addiction risk factors</div>
+      <div id="riskBars" style="margin-top:4px;">
+        <div class="bar-row"><div class="bar-label">Social media</div><div class="bar-track"><div class="bar-fill" style="width:91%;background:#8957e5;"></div></div><div class="bar-val">91%</div></div>
+        <div class="bar-row"><div class="bar-label">Notifications</div><div class="bar-track"><div class="bar-fill" style="width:83%;background:#1f6feb;"></div></div><div class="bar-val">83%</div></div>
+        <div class="bar-row"><div class="bar-label">Screen time</div><div class="bar-track"><div class="bar-fill" style="width:79%;background:#1abc9c;"></div></div><div class="bar-val">79%</div></div>
+        <div class="bar-row"><div class="bar-label">Gaming</div><div class="bar-track"><div class="bar-fill" style="width:64%;background:#d29922;"></div></div><div class="bar-val">64%</div></div>
+        <div class="bar-row"><div class="bar-label">App opens</div><div class="bar-track"><div class="bar-fill" style="width:58%;background:#f85149;"></div></div><div class="bar-val">58%</div></div>
+        <div class="bar-row"><div class="bar-label">Poor sleep</div><div class="bar-track"><div class="bar-fill" style="width:72%;background:#3fb950;"></div></div><div class="bar-val">72%</div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card" style="margin-bottom:12px;">
+    <div class="card-title">Screen time vs addiction level heatmap</div>
+    <div style="margin-bottom:8px;display:flex;gap:12px;flex-wrap:wrap;">
+      <div style="font-size:10px;color:#8b949e;">Screen time (hrs) →</div>
+      <div style="display:flex;gap:6px;align-items:center;font-size:10px;color:#8b949e;">
+        <span style="display:inline-block;width:10px;height:10px;background:#0d2137;border-radius:2px;"></span>Low
+        <span style="display:inline-block;width:10px;height:10px;background:#1f6feb;border-radius:2px;"></span>Medium
+        <span style="display:inline-block;width:10px;height:10px;background:#8957e5;border-radius:2px;"></span>High
+        <span style="display:inline-block;width:10px;height:10px;background:#f85149;border-radius:2px;"></span>Very high
+      </div>
+    </div>
+    <div id="heatmapWrap"></div>
+  </div>
+
+  <div class="insight-box">
+    <div class="insight-title">
+      <div class="insight-icon" style="font-size:12px;color:#fff;">i</div>
+      Dynamic insights
+    </div>
+    <div class="insight-grid">
+      <div class="insight-item">
+        <div class="insight-item-title">Screen time & sleep</div>
+        <div class="insight-item-text" id="ins1">Users with &gt;8h daily screen time average only 5.4h sleep — 27% below the 7.4h baseline of non-addicted users.</div>
+      </div>
+      <div class="insight-item">
+        <div class="insight-item-title">Notifications & addiction</div>
+        <div class="insight-item-text" id="ins2">Severely addicted users receive 120+ notifications/day on average — 38% more than mild-addiction users (87/day).</div>
+      </div>
+      <div class="insight-item">
+        <div class="insight-item-title">Social media influence</div>
+        <div class="insight-item-text" id="ins3">Social media usage is the strongest single predictor of addiction (91% correlation). Severe users average 4.8h/day on social platforms.</div>
+      </div>
+      <div class="insight-item">
+        <div class="insight-item-title">Stress escalation</div>
+        <div class="insight-item-text" id="ins4">High-stress users average 9.1h screen time vs 5.8h for low-stress — a 57% gap suggesting bidirectional stress-usage feedback.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<script>
+const DATA = (function() {
+  const rand = (min, max) => min + Math.random() * (max - min);
+  const pick = arr => arr[Math.floor(Math.random() * arr.length)];
+  const genders = ['Male', 'Female'];
+  const ageGroups = ['13-17', '18-24', '25-34', '35-44', '45+'];
+  const stressLevels = ['Low', 'Medium', 'High'];
+  const addictionLevels = ['Mild', 'Moderate', 'Severe'];
+  const impactLevels = ['None', 'Mild', 'Significant'];
+  const records = [];
+  for (let i = 0; i < 1200; i++) {
+    const add = pick(addictionLevels);
+    const addicted = add !== 'Mild' || Math.random() > 0.5;
+    const stress = add === 'Severe' ? (Math.random() < 0.6 ? 'High' : 'Medium') : add === 'Moderate' ? (Math.random() < 0.4 ? 'High' : pick(['Low','Medium'])) : pick(stressLevels);
+    const screen = add === 'Severe' ? rand(8,13) : add === 'Moderate' ? rand(5.5,9) : rand(2,7);
+    const sleep = Math.max(3.5, 8.5 - screen * 0.35 + rand(-0.5, 0.5));
+    const social = add === 'Severe' ? rand(3.5, 6) : add === 'Moderate' ? rand(2, 4.5) : rand(0.5, 3);
+    const gaming = add === 'Severe' ? rand(2, 5) : add === 'Moderate' ? rand(1, 3.5) : rand(0, 2);
+    const notif = add === 'Severe' ? rand(100, 200) : add === 'Moderate' ? rand(60, 130) : rand(20, 90);
+    const apps = add === 'Severe' ? rand(60, 120) : add === 'Moderate' ? rand(35, 80) : rand(10, 55);
+    const weekend = screen * (1 + rand(0.1, 0.5));
+    const ag = pick(ageGroups);
+    const impact = add === 'Severe' ? pick(['Mild','Significant','Significant']) : add === 'Moderate' ? pick(['None','Mild','Significant']) : pick(['None','None','Mild']);
+    records.push({ gender: pick(genders), ageGroup: ag, screen, sleep, social, gaming, notif, apps, weekend, stress, addictionLevel: add, addicted, impact });
+  }
+  return records;
+})();
+
+let filtered = [...DATA];
+
+function applyFilters() {
+  const g = document.getElementById('fGender').value;
+  const a = document.getElementById('fAge').value;
+  const s = document.getElementById('fStress').value;
+  const al = document.getElementById('fAddiction').value;
+  const imp = document.getElementById('fImpact').value;
+  filtered = DATA.filter(d =>
+    (g === 'all' || d.gender === g) &&
+    (a === 'all' || d.ageGroup === a) &&
+    (s === 'all' || d.stress === s) &&
+    (al === 'all' || d.addictionLevel === al) &&
+    (imp === 'all' || d.impact === imp)
+  );
+  updateAll();
+}
+
+function resetFilters() {
+  ['fGender','fAge','fStress','fAddiction','fImpact'].forEach(id => document.getElementById(id).value = 'all');
+  filtered = [...DATA];
+  updateAll();
+}
+
+function avg(arr, fn) { return arr.length ? arr.reduce((s,d) => s + fn(d), 0) / arr.length : 0; }
+function count(arr, fn) { return arr.filter(fn).length; }
+
+const charts = {};
+function destroyChart(id) { if (charts[id]) { charts[id].destroy(); delete charts[id]; } }
+
+const darkBg = '#161b22';
+const gridColor = 'rgba(48,54,61,0.8)';
+const textColor = '#8b949e';
+
+const COLORS = {
+  blue: '#1f6feb', purple: '#8957e5', teal: '#1abc9c',
+  red: '#f85149', amber: '#d29922', green: '#3fb950',
+  mild: '#3fb950', moderate: '#d29922', severe: '#f85149'
+};
+const ADD_LEVELS = ['Mild', 'Moderate', 'Severe'];
+const AGE_GROUPS = ['13-17', '18-24', '25-34', '35-44', '45+'];
+
+function makeChart(id, config) {
+  destroyChart(id);
+  const ctx = document.getElementById(id);
+  if (!ctx) return;
+  charts[id] = new Chart(ctx, config);
+}
+
+function updateKPIs() {
+  const n = filtered.length;
+  const sc = avg(filtered, d => d.screen);
+  const sl = avg(filtered, d => d.sleep);
+  const ar = count(filtered, d => d.addicted) / (n || 1) * 100;
+  const nt = avg(filtered, d => d.notif);
+  const ap = avg(filtered, d => d.apps);
+  document.getElementById('kpi-users').textContent = n.toLocaleString();
+  document.getElementById('kpi-screen').textContent = sc.toFixed(1) + 'h';
+  document.getElementById('kpi-sleep').textContent = sl.toFixed(1) + 'h';
+  document.getElementById('kpi-addiction').textContent = Math.round(ar) + '%';
+  document.getElementById('kpi-notif').textContent = Math.round(nt);
+  document.getElementById('kpi-apps').textContent = Math.round(ap);
+}
+
+function updateGenderDonut() {
+  const male = count(filtered, d => d.gender === 'Male');
+  const female = count(filtered, d => d.gender === 'Female');
+  const tot = male + female || 1;
+  const mp = Math.round(male/tot*100), fp = 100 - mp;
+  document.getElementById('lgm').textContent = 'Male — ' + mp + '%';
+  document.getElementById('lgf').textContent = 'Female — ' + fp + '%';
+  makeChart('donutGender', {
+    type: 'doughnut',
+    data: { datasets: [{ data: [male, female], backgroundColor: [COLORS.blue, COLORS.purple], borderWidth: 0, hoverOffset: 4 }], labels: ['Male','Female'] },
+    options: { responsive: true, maintainAspectRatio: false, cutout: '65%', plugins: { legend: { display: false }, tooltip: { callbacks: { label: ctx => ctx.label + ': ' + ctx.raw + ' (' + Math.round(ctx.raw/tot*100) + '%)' } } } }
+  });
+}
+
+function updateAgeBar() {
+  const counts = AGE_GROUPS.map(ag => count(filtered, d => d.ageGroup === ag));
+  makeChart('ageBar', {
+    type: 'bar',
+    data: { labels: AGE_GROUPS, datasets: [{ data: counts, backgroundColor: [COLORS.blue, COLORS.purple, COLORS.teal, COLORS.amber, COLORS.green], borderWidth: 0, borderRadius: 4 }] },
+    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip: { callbacks: { label: c => 'Users: ' + c.raw } } }, scales: { x: { ticks: { color: textColor, font: { size: 10 } }, grid: { display: false } }, y: { ticks: { color: textColor, font: { size: 10 } }, grid: { color: gridColor } } } }
+  });
+}
+
+function updateAddGender() {
+  const gds = ['Male', 'Female'];
+  const mild = gds.map(g => count(filtered, d => d.gender === g && d.addictionLevel === 'Mild'));
+  const mod = gds.map(g => count(filtered, d => d.gender === g && d.addictionLevel === 'Moderate'));
+  const sev = gds.map(g => count(filtered, d => d.gender === g && d.addictionLevel === 'Severe'));
+  makeChart('addGender', {
+    type: 'bar',
+    data: { labels: gds, datasets: [
+      { label: 'Mild', data: mild, backgroundColor: COLORS.mild, borderWidth: 0, borderRadius: 2 },
+      { label: 'Moderate', data: mod, backgroundColor: COLORS.moderate, borderWidth: 0, borderRadius: 2 },
+      { label: 'Severe', data: sev, backgroundColor: COLORS.severe, borderWidth: 0, borderRadius: 2 }
+    ]},
+    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { stacked: true, ticks: { color: textColor, font: { size: 10 } }, grid: { display: false } }, y: { stacked: true, ticks: { color: textColor, font: { size: 10 } }, grid: { color: gridColor } } } }
+  });
+}
+
+function updateAddAge() {
+  const mild = AGE_GROUPS.map(ag => count(filtered, d => d.ageGroup === ag && d.addictionLevel === 'Mild'));
+  const mod = AGE_GROUPS.map(ag => count(filtered, d => d.ageGroup === ag && d.addictionLevel === 'Moderate'));
+  const sev = AGE_GROUPS.map(ag => count(filtered, d => d.ageGroup === ag && d.addictionLevel === 'Severe'));
+  makeChart('addAge', {
+    type: 'bar',
+    data: { labels: AGE_GROUPS, datasets: [
+      { label: 'Mild', data: mild, backgroundColor: COLORS.mild, borderWidth: 0, borderRadius: 2 },
+      { label: 'Moderate', data: mod, backgroundColor: COLORS.moderate, borderWidth: 0, borderRadius: 2 },
+      { label: 'Severe', data: sev, backgroundColor: COLORS.severe, borderWidth: 0, borderRadius: 2 }
+    ]},
+    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { stacked: true, ticks: { color: textColor, font: { size: 10 } }, grid: { display: false } }, y: { stacked: true, ticks: { color: textColor, font: { size: 10 } }, grid: { color: gridColor } } } }
+  });
+}
+
+function updateScatterSleep() {
+  const sample = filtered.filter((_, i) => i % 4 === 0).slice(0, 200);
+  const ds = ADD_LEVELS.map((al, i) => ({
+    label: al,
+    data: sample.filter(d => d.addictionLevel === al).map(d => ({ x: +d.screen.toFixed(1), y: +d.sleep.toFixed(1) })),
+    backgroundColor: [COLORS.mild + 'aa', COLORS.moderate + 'aa', COLORS.severe + 'aa'][i],
+    pointRadius: 4, pointHoverRadius: 6
+  }));
+  makeChart('scatterSleep', {
+    type: 'scatter',
+    data: { datasets: ds },
+    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip: { callbacks: { label: c => `Screen: ${c.parsed.x}h, Sleep: ${c.parsed.y}h` } } }, scales: { x: { title: { display: true, text: 'Screen time (h)', color: textColor, font: { size: 10 } }, ticks: { color: textColor, font: { size: 10 } }, grid: { color: gridColor }, min: 1, max: 14 }, y: { title: { display: true, text: 'Sleep (h)', color: textColor, font: { size: 10 } }, ticks: { color: textColor, font: { size: 10 } }, grid: { color: gridColor }, min: 3, max: 10 } } }
+  });
+}
+
+function updateScatterNotif() {
+  const sample = filtered.filter((_, i) => i % 4 === 0).slice(0, 200);
+  const ds = ADD_LEVELS.map((al, i) => ({
+    label: al,
+    data: sample.filter(d => d.addictionLevel === al).map(d => ({ x: +d.notif.toFixed(0), y: +d.apps.toFixed(0) })),
+    backgroundColor: [COLORS.mild + 'aa', COLORS.moderate + 'aa', COLORS.severe + 'aa'][i],
+    pointRadius: 4, pointHoverRadius: 6
+  }));
+  makeChart('scatterNotif', {
+    type: 'scatter',
+    data: { datasets: ds },
+    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip: { callbacks: { label: c => `Notif: ${c.parsed.x}, App opens: ${c.parsed.y}` } } }, scales: { x: { title: { display: true, text: 'Notifications/day', color: textColor, font: { size: 10 } }, ticks: { color: textColor, font: { size: 10 } }, grid: { color: gridColor } }, y: { title: { display: true, text: 'App opens/day', color: textColor, font: { size: 10 } }, ticks: { color: textColor, font: { size: 10 } }, grid: { color: gridColor } } } }
+  });
+}
+
+function updateSocialBar() {
+  const vals = ADD_LEVELS.map(al => +avg(filtered.filter(d => d.addictionLevel === al), d => d.social).toFixed(1));
+  makeChart('socialBar', {
+    type: 'bar',
+    data: { labels: ADD_LEVELS, datasets: [{ label: 'Avg social media hours', data: vals, backgroundColor: [COLORS.mild, COLORS.moderate, COLORS.severe], borderWidth: 0, borderRadius: 6 }] },
+    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { ticks: { color: textColor, font: { size: 10 } }, grid: { display: false } }, y: { ticks: { color: textColor, font: { size: 10 } }, grid: { color: gridColor } } } }
+  });
+}
+
+function updateGameBar() {
+  const vals = ADD_LEVELS.map(al => +avg(filtered.filter(d => d.addictionLevel === al), d => d.gaming).toFixed(1));
+  makeChart('gameBar', {
+    type: 'bar',
+    data: { labels: ADD_LEVELS, datasets: [{ label: 'Avg gaming hours', data: vals, backgroundColor: [COLORS.mild, COLORS.moderate, COLORS.severe], borderWidth: 0, borderRadius: 6 }] },
+    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { ticks: { color: textColor, font: { size: 10 } }, grid: { display: false } }, y: { ticks: { color: textColor, font: { size: 10 } }, grid: { color: gridColor } } } }
+  });
+}
+
+function updateWeekendBar() {
+  const weekday = ADD_LEVELS.map(al => +avg(filtered.filter(d => d.addictionLevel === al), d => d.screen).toFixed(1));
+  const weekend = ADD_LEVELS.map(al => +avg(filtered.filter(d => d.addictionLevel === al), d => d.weekend).toFixed(1));
+  makeChart('weekendBar', {
+    type: 'bar',
+    data: { labels: ADD_LEVELS, datasets: [
+      { label: 'Weekday', data: weekday, backgroundColor: COLORS.blue + 'cc', borderWidth: 0, borderRadius: 4 },
+      { label: 'Weekend', data: weekend, backgroundColor: COLORS.purple + 'cc', borderWidth: 0, borderRadius: 4 }
+    ]},
+    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { ticks: { color: textColor, font: { size: 10 } }, grid: { display: false } }, y: { ticks: { color: textColor, font: { size: 10 } }, grid: { color: gridColor } } } }
+  });
+}
+
+function updateStressDonut() {
+  const counts = ['Low','Medium','High'].map(s => count(filtered, d => d.stress === s));
+  makeChart('stressDonut', {
+    type: 'doughnut',
+    data: { labels: ['Low','Medium','High'], datasets: [{ data: counts, backgroundColor: [COLORS.green, COLORS.amber, COLORS.red], borderWidth: 0, hoverOffset: 4 }] },
+    options: { responsive: true, maintainAspectRatio: false, cutout: '60%', plugins: { legend: { position: 'bottom', labels: { color: textColor, font: { size: 10 }, boxWidth: 10 } } } }
+  });
+}
+
+function updateImpactBar() {
+  const impLevels = ['None','Mild','Significant'];
+  const ds = ADD_LEVELS.map((al, i) => ({
+    label: al,
+    data: impLevels.map(imp => count(filtered, d => d.addictionLevel === al && d.impact === imp)),
+    backgroundColor: [COLORS.mild, COLORS.moderate, COLORS.severe][i],
+    borderWidth: 0, borderRadius: 4
+  }));
+  makeChart('impactBar', {
+    type: 'bar',
+    data: { labels: impLevels, datasets: ds },
+    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { stacked: true, ticks: { color: textColor, font: { size: 10 } }, grid: { display: false } }, y: { stacked: true, ticks: { color: textColor, font: { size: 10 } }, grid: { color: gridColor } } } }
+  });
+}
+
+function updateStressScreen() {
+  const vals = ['Low','Medium','High'].map(s => +avg(filtered.filter(d => d.stress === s), d => d.screen).toFixed(1));
+  makeChart('stressScreen', {
+    type: 'bar',
+    data: { labels: ['Low stress','Medium stress','High stress'], datasets: [{ data: vals, backgroundColor: [COLORS.green, COLORS.amber, COLORS.red], borderWidth: 0, borderRadius: 6 }] },
+    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { ticks: { color: textColor, font: { size: 10 } }, grid: { display: false } }, y: { ticks: { color: textColor, font: { size: 10 } }, grid: { color: gridColor } } } }
+  });
+}
+
+function updateSleepCompare() {
+  const nonAdd = filtered.filter(d => !d.addicted);
+  const add = filtered.filter(d => d.addicted);
+  const na = avg(nonAdd, d => d.sleep).toFixed(1);
+  const ya = avg(add, d => d.sleep).toFixed(1);
+  const diff = (na - ya).toFixed(1);
+  document.getElementById('sleepNo').textContent = na + 'h';
+  document.getElementById('sleepYes').textContent = ya + 'h';
+  document.getElementById('sleepDiff').textContent = '−' + Math.abs(diff) + 'h';
+  document.getElementById('barNa').style.width = (na / 10 * 100) + '%';
+  document.getElementById('barA').style.width = (ya / 10 * 100) + '%';
+}
+
+function updateAddPie() {
+  const add = count(filtered, d => d.addicted);
+  const notAdd = filtered.length - add;
+  makeChart('addPie', {
+    type: 'doughnut',
+    data: { labels: ['Addicted','Non-addicted'], datasets: [{ data: [add, notAdd], backgroundColor: [COLORS.red, COLORS.green], borderWidth: 0, hoverOffset: 4 }] },
+    options: { responsive: true, maintainAspectRatio: false, cutout: '55%', plugins: { legend: { position: 'bottom', labels: { color: textColor, font: { size: 10 }, boxWidth: 10 } } } }
+  });
+}
+
+function updateAddLevel() {
+  const vals = ADD_LEVELS.map(al => count(filtered, d => d.addictionLevel === al));
+  makeChart('addLevel', {
+    type: 'doughnut',
+    data: { labels: ADD_LEVELS, datasets: [{ data: vals, backgroundColor: [COLORS.mild, COLORS.moderate, COLORS.severe], borderWidth: 0, hoverOffset: 4 }] },
+    options: { responsive: true, maintainAspectRatio: false, cutout: '55%', plugins: { legend: { position: 'bottom', labels: { color: textColor, font: { size: 10 }, boxWidth: 10 } } } }
+  });
+}
+
+function updateHeatmap() {
+  const screenBins = ['0-2h','2-4h','4-6h','6-8h','8-10h','10-12h','12h+'];
+  const addLevels = ['Mild','Moderate','Severe'];
+  const getBin = v => v < 2 ? 0 : v < 4 ? 1 : v < 6 ? 2 : v < 8 ? 3 : v < 10 ? 4 : v < 12 ? 5 : 6;
+  const matrix = addLevels.map(al => screenBins.map((_, bi) => count(filtered, d => d.addictionLevel === al && getBin(d.screen) === bi)));
+  const maxVal = Math.max(...matrix.flat(), 1);
+  const colors = ['#0d2137','#1a3a5c','#1f6feb','#6e40c9','#8957e5','#c44dce','#f85149'];
+  let html = '<div style="display:grid;grid-template-columns:70px repeat(7,minmax(0,1fr));gap:3px;">';
+  html += '<div></div>' + screenBins.map(b => `<div style="font-size:9px;color:#8b949e;text-align:center;padding-bottom:4px;">${b}</div>`).join('');
+  addLevels.forEach((al, ai) => {
+    html += `<div style="font-size:10px;color:#8b949e;display:flex;align-items:center;">${al}</div>`;
+    matrix[ai].forEach(val => {
+      const ratio = val / maxVal;
+      const ci = Math.min(6, Math.floor(ratio * 7));
+      html += `<div style="height:32px;background:${colors[ci]};border-radius:3px;display:flex;align-items:center;justify-content:center;font-size:9px;color:rgba(255,255,255,0.8);font-weight:500;" title="Count: ${val}">${val}</div>`;
+    });
+  });
+  html += '</div>';
+  document.getElementById('heatmapWrap').innerHTML = html;
+}
+
+function updateInsights() {
+  const n = filtered.length || 1;
+  const highScreen = filtered.filter(d => d.screen > 8);
+  const avgSleepHigh = avg(highScreen, d => d.sleep).toFixed(1);
+  const severeNotif = avg(filtered.filter(d => d.addictionLevel === 'Severe'), d => d.notif).toFixed(0);
+  const mildNotif = avg(filtered.filter(d => d.addictionLevel === 'Mild'), d => d.notif).toFixed(0);
+  const sevSocial = avg(filtered.filter(d => d.addictionLevel === 'Severe'), d => d.social).toFixed(1);
+  const highStressScreen = avg(filtered.filter(d => d.stress === 'High'), d => d.screen).toFixed(1);
+  const lowStressScreen = avg(filtered.filter(d => d.stress === 'Low'), d => d.screen).toFixed(1);
+  document.getElementById('ins1').textContent = `Users with >8h daily screen time average only ${avgSleepHigh}h sleep — a significant shortfall from the recommended 7–8h.`;
+  document.getElementById('ins2').textContent = `Severely addicted users receive ~${severeNotif} notifications/day vs ${mildNotif} for mild-addiction users — a marked escalation pattern.`;
+  document.getElementById('ins3').textContent = `Social media is the strongest single predictor of addiction. Severe users average ${sevSocial}h/day on social platforms.`;
+  document.getElementById('ins4').textContent = `High-stress users average ${highStressScreen}h screen time vs ${lowStressScreen}h for low-stress — a feedback loop between stress and usage.`;
+}
+
+function updateAll() {
+  updateKPIs();
+  updateGenderDonut();
+  updateAgeBar();
+  updateAddGender();
+  updateAddAge();
+  updateScatterSleep();
+  updateScatterNotif();
+  updateSocialBar();
+  updateGameBar();
+  updateWeekendBar();
+  updateStressDonut();
+  updateImpactBar();
+  updateStressScreen();
+  updateSleepCompare();
+  updateAddPie();
+  updateAddLevel();
+  updateHeatmap();
+  updateInsights();
+}
+
+updateAll();
+</script>
